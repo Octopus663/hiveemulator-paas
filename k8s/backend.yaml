@@ -1,0 +1,35 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hive-backend
+spec:
+  replicas: 2 # Тут ми одразу реалізуємо масштабування
+  selector:
+    matchLabels:
+      app: hive-backend
+  template:
+    metadata:
+      labels:
+        app: hive-backend
+    spec:
+      containers:
+      - name: backend
+        image: andriikunda/hive-backend:v1
+        ports:
+        - containerPort: 8080
+        env:
+        - name: Redis__ConnectionString
+          value: "redis-service:6379,abortConnect=False"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: backend-service
+spec:
+  selector:
+    app: hive-backend
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 8080
+  type: ClusterIP # Внутрішній доступ
